@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stand Generator AI</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- MODAL API BYOK -->
+  <div class="modal-overlay" id="apiModalOverlay">
+    <div class="modal-content">
+      <button class="modal-close" onclick="document.getElementById('apiModalOverlay').classList.remove('visible')">&times;</button>
+      <div class="modal-title">⚙️ Provedor de IA (BYOK)</div>
+      <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
+        <div>
+          <label style="display: block; font-size: 0.75rem; color: var(--muted); margin-bottom: 4px;">Provedor</label>
+          <select id="apiProvider" style="width: 100%; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 10px; font-size: 0.9rem; outline:none;">
+            <option value="gemini">Google Gemini</option>
+            <option value="groq">Groq (Llama/Mixtral)</option>
+            <option value="openai">OpenAI (ChatGPT)</option>
+            <option value="xai">xAI (Grok)</option>
+          </select>
+        </div>
+        <div>
+          <label style="display: block; font-size: 0.75rem; color: var(--muted); margin-bottom: 4px;">Modelo</label>
+          <select id="apiModel" style="width: 100%; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 10px; font-size: 0.9rem; outline:none;"></select>
+        </div>
+        <div>
+          <label style="display: block; font-size: 0.75rem; color: var(--muted); margin-bottom: 4px;">API Key <span style="font-size: 0.65rem; color: var(--accent-light);">(Salva no navegador)</span></label>
+          <input type="password" id="apiKey" placeholder="Cole sua chave aqui..." style="width: 100%; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 10px; font-size: 0.9rem; outline:none;">
+        </div>
+      </div>
+      <button class="btn" style="width: 100%; padding: 10px; font-size: 0.85rem;" onclick="document.getElementById('apiModalOverlay').classList.remove('visible')">Salvar & Fechar</button>
+    </div>
+  </div>
+
+  <!-- BARRA LATERAL -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h1>👁️ Stand AI</h1>
+      <div class="subtitle">Gerador inteligente de Stands</div>
+    </div>
+
+    <div class="history-section">
+      <div class="history-title">
+        <span>Histórico</span>
+        <span id="btnClearHistory" style="color: #ef4444; cursor: pointer; text-transform: none; letter-spacing: normal;">Limpar</span>
+      </div>
+      <div class="history-chips" id="historyChips"></div>
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="settings-btn" onclick="document.getElementById('apiModalOverlay').classList.add('visible')">
+        ⚙️ Configurar API Key
+      </button>
+
+      <div class="controls">
+        <div class="filter-row">
+          <div>
+            <label style="font-size:0.7rem;color:var(--muted);display:block;margin-bottom:3px;">Tipo de Manifestação</label>
+            <select id="tipoManifestacao">
+              <option value="aleatorio">🎲 Aleatório</option>
+              <option value="Humanóide">🧍 Humanóide</option>
+              <option value="Distante">🌊 Distante</option>
+              <option value="Automático">🤖 Automático</option>
+              <option value="Colônia">🐜 Colônia</option>
+              <option value="Vinculado">⛓️ Vinculado</option>
+              <option value="Ato">🎭 Ato (Multiforme)</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:0.7rem;color:var(--muted);display:block;margin-bottom:3px;">Poder Destrutivo</label>
+            <select id="poderDestrutivo">
+              <option value="aleatorio">🎲 Aleatório</option>
+              <option value="A">A — Devastador</option>
+              <option value="B">B — Grande</option>
+              <option value="C">C — Médio</option>
+              <option value="D">D — Baixo</option>
+              <option value="E">E — Mínimo</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn" id="btnGerar" onclick="gerarStand()">⭐ Gerar Stand</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ÁREA PRINCIPAL -->
+  <main class="main-content">
+    <div class="error-box" id="errorBox"></div>
+
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <div>Manifestando Stand...</div>
+    </div>
+
+    <!-- CARD -->
+    <div class="card" id="card">
+      <div class="card-grid">
+
+        <!-- COLUNA ESQUERDA -->
+        <div class="lore-col">
+          <div class="card-header">
+            <div class="card-number" id="cardNumero">#001</div>
+            <div class="card-name" id="cardNome">Carregando</div>
+            <div class="card-category" id="cardTema">Tema Desconhecido</div>
+          </div>
+
+          <div class="types" id="cardTipos"></div>
+
+          <div class="section-label">Habilidade Principal</div>
+          <div class="dex-entry" id="cardHabilidade"></div>
+
+          <div class="section-label" style="margin-top:18px;">Descrição</div>
+          <div class="dex-entry" id="cardDescricao"></div>
+
+          <div id="promptContainer" style="margin-top:15px;"></div>
+
+          <div class="section-label" style="margin-top: 24px;">Fraquezas & Limitações</div>
+          <div class="dex-entry" id="cardFraquezas"></div>
+
+          <div class="section-label" style="margin-top: 24px;">Técnicas</div>
+          <div class="abilities-row" id="tecnicasList"></div>
+
+          <button class="copy-btn" onclick="copiarStand()">📋 Copiar texto</button>
+        </div>
+
+        <!-- COLUNA DIREITA -->
+        <div class="combat-col">
+          <div>
+            <div class="section-label">Estatísticas</div>
+            <div class="stats-container">
+              <div class="stats-grid" id="statsGrid"></div>
+            </div>
+          </div>
+
+          <div>
+            <div class="section-label">Detalhes do Stand</div>
+            <div class="abilities-row" id="detalhesRow"></div>
+          </div>
+
+          <div>
+            <div class="section-label">Usuário</div>
+            <div class="abilities-row" id="usuarioBox"></div>
+          </div>
+
+          <div>
+            <div class="section-label">Referências Musicais</div>
+            <div class="location-list" id="refMusicais"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
