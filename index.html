@@ -41,118 +41,117 @@
   <!-- BARRA LATERAL -->
   <aside class="sidebar">
     <div class="sidebar-header">
-      <div class="logo">&#128065;&#65039; Stand AI</div>
-      <div class="logo-sub">Gerador inteligente de Stands</div>
+      <h1>&#128065;&#65039; Stand AI</h1>
+      <div class="subtitle">Gerador inteligente de Stands</div>
     </div>
 
-    <div style="display:flex; gap:6px; margin-bottom:8px;">
-      <button class="btn btn-secondary" style="flex:1; font-size:0.75rem; padding:7px;" onclick="document.getElementById('historyPanel').classList.toggle('open')">&#128221; Hist&#243;rico</button>
-      <button class="btn btn-danger" id="btnClearHistory" style="flex:1; font-size:0.75rem; padding:7px;">&#128465; Limpar</button>
+    <div class="history-section">
+      <div class="history-title">
+        <span>Hist&#243;rico</span>
+        <button id="btnClearHistory" style="background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:3px 8px;font-size:0.7rem;cursor:pointer;" title="Limpar hist&#243;rico">&#128465; Limpar</button>
+      </div>
+      <div class="history-chips" id="historyChips"></div>
     </div>
 
-    <button class="btn btn-secondary" style="width:100%; margin-bottom:12px; font-size:0.8rem;"
-      onclick="document.getElementById('apiModalOverlay').classList.add('visible')">&#9881;&#65039; Configurar API Key</button>
-
-    <div class="form-group">
-      <label>Tipo de Manifesta&#231;&#227;o</label>
-      <select id="tipoManifestacao">
-        <option value="aleatorio">&#127922; Aleat&#243;rio</option>
-        <option value="Human&#243;ide">&#129489; Human&#243;ide</option>
-        <option value="Distante">&#127754; Distante</option>
-        <option value="Autom&#225;tico">&#129302; Autom&#225;tico</option>
-        <option value="Col&#244;nia">&#127028; Col&#244;nia</option>
-        <option value="Vinculado">&#9939;&#65039; Vinculado</option>
-        <option value="Ato">&#127917; Ato (Multiforme)</option>
-      </select>
+    <div class="sidebar-footer">
+      <button class="settings-btn" onclick="document.getElementById('apiModalOverlay').classList.add('visible')">&#9881;&#65039; Configurar API Key</button>
+      <div class="controls">
+        <div class="filter-row">
+          <label style="font-size:0.75rem;color:var(--muted);">Tipo de Manifesta&#231;&#227;o</label>
+          <select id="tipoManifestacao">
+            <option value="aleatorio">&#127922; Aleat&#243;rio</option>
+            <option value="Human&#243;ide">&#129489; Human&#243;ide</option>
+            <option value="Distante">&#127754; Distante</option>
+            <option value="Autom&#225;tico">&#129302; Autom&#225;tico</option>
+            <option value="Col&#244;nia">&#127028; Col&#244;nia</option>
+            <option value="Vinculado">&#9939;&#65039; Vinculado</option>
+            <option value="Ato">&#127917; Ato (Multiforme)</option>
+          </select>
+        </div>
+        <div class="filter-row">
+          <label style="font-size:0.75rem;color:var(--muted);">Poder Destrutivo</label>
+          <select id="poderDestrutivo">
+            <option value="aleatorio">&#127922; Aleat&#243;rio</option>
+            <option value="A">A &#8212; Devastador</option>
+            <option value="B">B &#8212; Grande</option>
+            <option value="C">C &#8212; M&#233;dio</option>
+            <option value="D">D &#8212; Baixo</option>
+            <option value="E">E &#8212; M&#237;nimo</option>
+          </select>
+        </div>
+        <button class="btn" id="btnGerar" onclick="gerarStand()">&#11088; Gerar Stand</button>
+      </div>
     </div>
-
-    <div class="form-group">
-      <label>Poder Destrutivo</label>
-      <select id="poderDestrutivo">
-        <option value="aleatorio">&#127922; Aleat&#243;rio</option>
-        <option value="A">A &#8212; Devastador</option>
-        <option value="B">B &#8212; Grande</option>
-        <option value="C">C &#8212; M&#233;dio</option>
-        <option value="D">D &#8212; Baixo</option>
-        <option value="E">E &#8212; M&#237;nimo</option>
-      </select>
-    </div>
-
-    <button class="btn" id="btnGerar" onclick="gerarStand()">&#11088; Gerar Stand</button>
   </aside>
-
-  <!-- PAINEL HISTORICO -->
-  <div class="history-panel" id="historyPanel">
-    <div id="historyChips"></div>
-  </div>
 
   <!-- CONTEUDO PRINCIPAL -->
   <main class="main-content">
 
-    <div class="loading" id="loading">Manifestando Stand...</div>
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      Manifestando Stand...
+    </div>
     <div class="error-box" id="errorBox"></div>
 
     <div class="card" id="card">
       <div class="card-header">
-        <div>
-          <div class="card-number" id="cardNumero">#001</div>
-          <div class="card-name" id="cardNome">Carregando</div>
-          <div class="card-tema" id="cardTema">Tema Desconhecido</div>
-          <div class="card-tipos" id="cardTipos"></div>
-        </div>
+        <div class="card-number" id="cardNumero">#001</div>
+        <div class="card-name" id="cardNome">Carregando</div>
+        <div class="card-category" id="cardTema">Tema Desconhecido</div>
+        <div class="types" id="cardTipos"></div>
       </div>
 
-      <div class="card-section">
-        <div class="section-title">Habilidade Principal</div>
-        <div class="card-text" id="cardHabilidade"></div>
+      <div style="margin-bottom:16px;">
+        <div class="section-label">Habilidade Principal</div>
+        <div class="dex-entry" id="cardHabilidade"></div>
       </div>
 
-      <div class="card-section">
-        <div class="section-title">Descri&#231;&#227;o</div>
-        <div class="card-text" id="cardDescricao"></div>
+      <div style="margin-bottom:16px;">
+        <div class="section-label">Descri&#231;&#227;o</div>
+        <div class="dex-entry" id="cardDescricao"></div>
       </div>
 
       <!-- LINHA DE ATOS -->
-      <div class="card-section" id="atoLineSection" style="display:none;">
-        <div class="section-title">Linha de Atos</div>
+      <div style="margin-bottom:16px;" id="atoLineSection" style="display:none;">
+        <div class="section-label">Linha de Atos</div>
         <div class="ato-line" id="atoLine"></div>
       </div>
 
-      <div class="card-section">
-        <div class="section-title">Fraquezas &amp; Limita&#231;&#245;es</div>
-        <div class="card-text" id="cardFraquezas"></div>
+      <div style="margin-bottom:16px;">
+        <div class="section-label">Fraquezas &amp; Limita&#231;&#245;es</div>
+        <div class="dex-entry" id="cardFraquezas"></div>
       </div>
 
-      <div class="card-section">
-        <div class="section-title">T&#233;cnicas</div>
+      <div style="margin-bottom:16px;">
+        <div class="section-label">T&#233;cnicas</div>
         <div id="tecnicasList"></div>
       </div>
 
       <!-- BOTOES DE ACAO -->
-      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:4px;">
-        <button class="btn btn-secondary copy-btn" onclick="copiarStand()">&#128203; Copiar texto</button>
-        <button class="btn btn-requiem" id="btnRequiem" style="display:none;" onclick="gerarRequiem()">&#9760;&#65039; Transformar em R&#233;quiem</button>
+      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px;">
+        <button class="copy-btn" onclick="copiarStand()">&#128203; Copiar texto</button>
+        <button class="btn-requiem" id="btnRequiem" style="display:none;" onclick="gerarRequiem()">&#9760;&#65039; Transformar em R&#233;quiem</button>
       </div>
 
-      <div class="card-section" id="promptContainer"></div>
+      <div id="promptContainer" style="margin-bottom:16px;"></div>
 
-      <div class="card-section">
-        <div class="section-title">Estat&#237;sticas</div>
+      <div style="margin-bottom:16px;">
+        <div class="section-label">Estat&#237;sticas</div>
         <div class="stats-grid" id="statsGrid"></div>
       </div>
 
-      <div class="card-section">
-        <div class="section-title">Detalhes do Stand</div>
+      <div style="margin-bottom:16px;">
+        <div class="section-label">Detalhes do Stand</div>
         <div class="detalhes-row" id="detalhesRow"></div>
       </div>
 
-      <div class="card-section">
-        <div class="section-title">Usu&#225;rio</div>
+      <div style="margin-bottom:16px;">
+        <div class="section-label">Usu&#225;rio</div>
         <div id="usuarioBox"></div>
       </div>
 
-      <div class="card-section">
-        <div class="section-title">Refer&#234;ncias Musicais</div>
+      <div style="margin-bottom:16px;">
+        <div class="section-label">Refer&#234;ncias Musicais</div>
         <div id="refMusicais"></div>
       </div>
     </div>
