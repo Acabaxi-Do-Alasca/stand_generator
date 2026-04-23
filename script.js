@@ -48,9 +48,6 @@ let savedHistory  = [];
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 function resolverFiltro(val, opts) { return val === "aleatorio" ? pick(opts) : val; }
 
-// ─────────────────────────────────────────────
-// GERAR
-// ─────────────────────────────────────────────
 async function gerarStand() {
   const btnGerar  = document.getElementById("btnGerar");
   const loading   = document.getElementById("loading");
@@ -108,9 +105,7 @@ async function gerarStand() {
 
   const temaInsp = pick(temasInspiracoes);
   const catTipo  = pick(categoriasTipo);
-
-  // Quantidade de atos aleatória (2 a 4) quando for Ato
-  const numAtos = tipoManifestacao === "Ato" ? (Math.floor(Math.random() * 3) + 2) : 0;
+  const numAtos  = tipoManifestacao === "Ato" ? (Math.floor(Math.random() * 3) + 2) : 0;
 
   const instrucaoExtra = `
 --- FATORES ALEATÓRIOS OBRIGATÓRIOS ---
@@ -121,25 +116,38 @@ PODER DESTRUTIVO DEFINIDO: ${poderDestrutivo}
 ${tipoManifestacao === "Ato" ? `QUANTIDADE DE ATOS: ${numAtos} (OBRIGATÓRIO gerar exatamente ${numAtos} atos no array "atos")` : ""}
 --------------------------------------`;
 
-  // ── Bloco de instrução extra para Ato no prompt ──
   const blocoAto = tipoManifestacao === "Ato" ? `
-COMO ESTE STAND É DO TIPO "ATO", o JSON deve conter o campo "atos" (array) NO LUGAR de "tecnicas", "stats", "aparencia" e "habilidadePrincipal" no nível raiz.
+COMO ESTE STAND É DO TIPO "ATO", o JSON deve conter o campo "atos" (array).
 Cada ato é uma fase distinta do Stand (como Crazy Diamond Act 1, 2, 3...), com aparência, habilidade, stats e técnicas próprios.
-Estrutura obrigatória do array "atos":
-[
-  {
-    "ato": 1,
-    "nome": "NOME DO STAND: ACT 1",
-    "aparencia": "Descrição visual do Ato 1.",
-    "habilidadePrincipal": "Habilidade específica do Ato 1.",
-    "descricao": "Comportamento e personalidade do Ato 1.",
-    "fraquezas": "Limitações do Ato 1.",
-    "stats": { "poderDestrutivo": "C", "velocidade": "B", "alcance": "C", "persistencia": "B", "precisao": "C", "potencialDesenv": "A" },
-    "tecnicas": [ { "nome": "Técnica", "descricao": "Descrição.", "tipo": "ofensiva" } ]
-  }
-]
+
+Estrutura obrigatória de CADA objeto dentro do array "atos":
+{
+  "ato": 1,
+  "nome": "NOME DO STAND: ACT 1",
+  "condicaoTransicao": null,
+  "aparencia": "Descrição visual do Ato 1.",
+  "habilidadePrincipal": "Habilidade específica do Ato 1.",
+  "descricao": "Comportamento e personalidade do Ato 1.",
+  "fraquezas": "Limitações do Ato 1.",
+  "stats": { "poderDestrutivo": "C", "velocidade": "B", "alcance": "C", "persistencia": "B", "precisao": "C", "potencialDesenv": "A" },
+  "tecnicas": [ { "nome": "Técnica", "descricao": "Descrição.", "tipo": "ofensiva" } ]
+}
+
+REGRA DO CAMPO "condicaoTransicao":
+- O Ato 1 deve ter "condicaoTransicao": null (pois é o estado inicial).
+- Do Ato 2 em diante, "condicaoTransicao" é uma string em PORTUGUÊS descrevendo COMO e POR QUÊ o Stand transiciona do ato ANTERIOR para este ato.
+- Varie bastante os gatilhos de transição! Exemplos criativos:
+  "Ativado quando o usuário sofre dano superior a 30% do seu HP"
+  "Requer concentração de 10 segundos sem receber golpes"
+  "Ativado por um grito específico do usuário"
+  "Ocorre automaticamente ao detectar um inimigo a menos de 2 metros"
+  "Ativado quando o usuário sente raiva extrema ou desespero"
+  "Requer que o usuário toque no próprio Stand com as duas mãos"
+  "Transiciona após acumular energia de 5 golpes bem-sucedidos"
+  "Ativado apenas à meia-noite ou em locais de escuridão total"
+
 Os Atos devem evoluir progressivamente: o Ato 1 é mais simples/fraco, o último é o mais poderoso.
-Os campos "aparencia", "habilidadePrincipal", "descricao", "fraquezas", "stats" e "tecnicas" AINDA devem existir no nível raiz do JSON (use os dados do Ato FINAL como referência para o nível raiz).
+Os campos "aparencia", "habilidadePrincipal", "descricao", "fraquezas", "stats" e "tecnicas" no nível raiz do JSON devem usar os dados do Ato FINAL como referência.
 ` : "";
 
   const prompt = `Você é um criador de Stands de JoJo's Bizarre Adventure. Crie um Stand completamente original e criativo.
@@ -244,17 +252,14 @@ ${instrucaoExtra}`;
 
     const geradosNestaSessao = [];
 
-    // ── SE FOR ATO: cada ato vira um card separado (igual evolucao[] do Fakemon) ──
     if (stand.tipoManifestacao === "Ato" && stand.atos && stand.atos.length > 0) {
       stand.atos.forEach(ato => {
         contador++;
-        // Monta objeto completo do ato herdando campos do stand pai
         const atoObj = buildAtoObject(ato, stand);
         sessionStands[atoObj._chave] = { stand: atoObj, num: contador };
         geradosNestaSessao.push({ stand: atoObj, num: contador });
       });
     } else {
-      // Stand normal — um único card
       contador++;
       sessionStands[stand.nome] = { stand, num: contador };
       geradosNestaSessao.push({ stand, num: contador });
@@ -264,10 +269,7 @@ ${instrucaoExtra}`;
     localStorage.setItem("stand_history", JSON.stringify(savedHistory));
     localStorage.setItem("stand_contador", contador.toString());
 
-    // Chips em ordem inversa (menor número aparece mais abaixo, igual ao Fakemon)
     [...geradosNestaSessao].reverse().forEach(item => adicionarHistorico(item.stand, item.num));
-
-    // Exibe o Ato 1 (ou o único stand)
     renderCard(geradosNestaSessao[0].stand, geradosNestaSessao[0].num);
 
   } catch(e) {
@@ -279,58 +281,50 @@ ${instrucaoExtra}`;
   }
 }
 
-// ─────────────────────────────────────────────
-// BUILD ATO OBJECT  (equivalente ao buildStageObject do Fakemon)
-// ─────────────────────────────────────────────
+// ────────────────────────────────────────────
 function buildAtoObject(ato, parent) {
   return {
-    // Identificação
-    nome:              ato.nome || `${parent.nome}: ACT ${ato.ato}`,
-    _chave:            `${parent.nome}__ato${ato.ato}`,
-    tema:              parent.tema,
-    tipoManifestacao:  parent.tipoManifestacao,
-    // Campos próprios do ato
-    aparencia:         ato.aparencia         || parent.aparencia,
-    habilidadePrincipal: ato.habilidadePrincipal || parent.habilidadePrincipal,
-    descricao:         ato.descricao         || parent.descricao,
-    fraquezas:         ato.fraquezas         || parent.fraquezas,
-    stats:             ato.stats             || parent.stats,
-    tecnicas:          ato.tecnicas          || parent.tecnicas,
-    // Campos herdados do stand pai
-    usuario:           parent.usuario,
-    detalhes:          parent.detalhes,
+    nome:                ato.nome || `${parent.nome}: ACT ${ato.ato}`,
+    _chave:              `${parent.nome}__ato${ato.ato}`,
+    tema:                parent.tema,
+    tipoManifestacao:    parent.tipoManifestacao,
+    aparencia:           ato.aparencia             || parent.aparencia,
+    habilidadePrincipal: ato.habilidadePrincipal   || parent.habilidadePrincipal,
+    descricao:           ato.descricao             || parent.descricao,
+    fraquezas:           ato.fraquezas             || parent.fraquezas,
+    stats:               ato.stats                 || parent.stats,
+    tecnicas:            ato.tecnicas              || parent.tecnicas,
+    condicaoTransicao:   ato.condicaoTransicao      || null,   // ← NOVO
+    usuario:             parent.usuario,
+    detalhes:            parent.detalhes,
     referenciasMusicais: parent.referenciasMusicais,
-    // Metadados para navegação
-    _isAto:            true,
-    _numAto:           ato.ato,
-    _parentNome:       parent.nome,
-    _totalAtos:        parent.atos.length,
-    _atos:             parent.atos
+    _isAto:              true,
+    _numAto:             ato.ato,
+    _parentNome:         parent.nome,
+    _totalAtos:          parent.atos.length,
+    _atos:               parent.atos
   };
 }
 
-// ─────────────────────────────────────────────
-// RENDER CARD
-// ─────────────────────────────────────────────
+// ────────────────────────────────────────────
 function renderCard(stand, num) {
-  document.getElementById("cardNome").textContent   = stand.nome;
-  document.getElementById("cardTema").textContent   = stand.tema || "";
-  document.getElementById("cardNumero").textContent = `#${String(num).padStart(3, "0")}`;
+  document.getElementById("cardNome").textContent       = stand.nome;
+  document.getElementById("cardTema").textContent       = stand.tema || "";
+  document.getElementById("cardNumero").textContent     = `#${String(num).padStart(3, "0")}`;
   document.getElementById("cardHabilidade").textContent = stand.habilidadePrincipal || "";
   document.getElementById("cardDescricao").textContent  = stand.descricao || "";
   document.getElementById("cardFraquezas").textContent  = stand.fraquezas || "";
 
-  // ── Badges de tipo ──
+  // Badges
   const tiposEl = document.getElementById("cardTipos");
   tiposEl.innerHTML = "";
   const TIPO_COLORS = {
     "Humanóide": "#7c3aed", "Distante": "#38bdf8", "Automático": "#f97316",
-    "Colônia": "#4ade80",   "Vinculado": "#f472b6", "Ato": "#facc15"
+    "Colônia":   "#4ade80", "Vinculado": "#f472b6", "Ato": "#facc15"
   };
-
-  // Se for Ato, exibe badge de qual ato é
   const tipoLabel = stand._isAto ? `Ato ${stand._numAto} de ${stand._totalAtos}` : stand.tipoManifestacao;
-  [stand.tipoManifestacao, tipoLabel !== stand.tipoManifestacao ? tipoLabel : null,
+  [stand.tipoManifestacao,
+   tipoLabel !== stand.tipoManifestacao ? tipoLabel : null,
    stand.stats?.poderDestrutivo ? `Poder ${stand.stats.poderDestrutivo}` : null
   ].filter(Boolean).forEach(t => {
     const b = document.createElement("span");
@@ -341,11 +335,11 @@ function renderCard(stand, num) {
     tiposEl.appendChild(b);
   });
 
-  // ── Prompt de imagem ──
+  // Prompt de imagem
   const pc = document.getElementById("promptContainer");
   const apparence = (stand.aparencia || "").replace(/"/g, "'");
-  const atoLabel  = stand._isAto ? ` Act ${stand._numAto}` : "";
-  const imgPrompt = `JoJo's Bizarre Adventure Stand, manga style, Araki art style, dramatic lighting, isolated on white background. Stand named ${stand.nome}${atoLabel}. Type: ${stand.tipoManifestacao}. Appearance: ${apparence}. Detailed, stylized, bold outlines, high contrast.`;
+  const atoSuffix = stand._isAto ? ` Act ${stand._numAto}` : "";
+  const imgPrompt = `JoJo's Bizarre Adventure Stand, manga style, Araki art style, dramatic lighting, isolated on white background. Stand named ${stand.nome}${atoSuffix}. Type: ${stand.tipoManifestacao}. Appearance: ${apparence}. Detailed, stylized, bold outlines, high contrast.`;
   pc.innerHTML = `
     <div style="font-size:0.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;">Prompt para Gerar Imagem</div>
     <div style="display:flex;gap:10px;align-items:center;">
@@ -356,23 +350,30 @@ function renderCard(stand, num) {
       <strong>Obs:</strong> Recomenda-se o <a href="https://leonardo.ai" target="_blank" style="color:#38bdf8;text-decoration:underline;">Leonardo.ai</a> para gerar a imagem.
     </div>`;
 
-  // ── Linha de Atos (equivalente ao evoLine do Fakemon) ──
+  // ── Linha de Atos com condicaoTransicao ──
   const atoLineSection = document.getElementById("atoLineSection");
   const atoLine        = document.getElementById("atoLine");
   if (stand._isAto && stand._atos && stand._atos.length > 1) {
     atoLineSection.style.display = "block";
     atoLine.innerHTML = "";
+
     stand._atos.forEach((a, idx) => {
       const chave     = `${stand._parentNome}__ato${a.ato}`;
       const isCurrent = a.ato === stand._numAto;
 
+      // Seta com condicaoTransicao do ato atual (a partir do ato 2)
       if (idx > 0) {
-        const arr = document.createElement("div");
-        arr.style.cssText = "display:flex;flex-direction:column;align-items:center;padding-top:4px;gap:2px;";
-        arr.innerHTML = `<span class="evo-arrow">→</span>`;
+        const cond = a.condicaoTransicao || "";
+        const arr  = document.createElement("div");
+        arr.style.cssText = "display:flex;flex-direction:column;align-items:center;padding-top:4px;gap:3px;max-width:90px;text-align:center;";
+        arr.innerHTML = `
+          <span class="evo-arrow">→</span>
+          ${cond ? `<span style="font-size:0.6rem;color:#facc15;line-height:1.3;word-break:break-word;">${cond}</span>` : ""}
+        `;
         atoLine.appendChild(arr);
       }
 
+      // Card do ato
       const el = document.createElement("div");
       el.className = "evo-stage";
 
@@ -400,7 +401,7 @@ function renderCard(stand, num) {
     atoLineSection.style.display = "none";
   }
 
-  // ── Stats ──
+  // Stats
   const statsGrid = document.getElementById("statsGrid");
   statsGrid.innerHTML = `
     <div style="grid-column:1/-1;display:grid;grid-template-columns:140px 60px 1fr;gap:6px;align-items:center;margin-bottom:4px;">
@@ -422,7 +423,7 @@ function renderCard(stand, num) {
       </div>`;
   });
 
-  // ── Técnicas ──
+  // Técnicas
   const tecList = document.getElementById("tecnicasList");
   tecList.innerHTML = "";
   (stand.tecnicas || []).forEach(t => {
@@ -436,7 +437,7 @@ function renderCard(stand, num) {
     </div>`;
   });
 
-  // ── Detalhes ──
+  // Detalhes
   const det    = stand.detalhes || {};
   const detRow = document.getElementById("detalhesRow");
   detRow.innerHTML = `
@@ -449,7 +450,7 @@ function renderCard(stand, num) {
       </div>
     </div>`;
 
-  // ── Usuário ──
+  // Usuário
   const usr    = stand.usuario || {};
   const usrBox = document.getElementById("usuarioBox");
   usrBox.innerHTML = `
@@ -459,7 +460,7 @@ function renderCard(stand, num) {
       ${usr.fraseIconica ? `<div style="margin-top:6px;font-size:0.78rem;color:#facc15;font-style:italic;">"${usr.fraseIconica}"</div>` : ""}
     </div>`;
 
-  // ── Referências musicais ──
+  // Referências musicais
   const refList = document.getElementById("refMusicais");
   refList.innerHTML = "";
   (stand.referenciasMusicais || []).forEach(r => {
@@ -474,16 +475,13 @@ function renderCard(stand, num) {
   document.getElementById("card").classList.add("visible");
 }
 
-// ─────────────────────────────────────────────
-// HISTÓRICO
-// ─────────────────────────────────────────────
+// ────────────────────────────────────────────
 function adicionarHistorico(stand, num) {
   const chips = document.getElementById("historyChips");
   const chip  = document.createElement("div");
   chip.className = "chip";
   chip.style.cssText = "display:flex;align-items:center;gap:6px;padding-right:4px;";
 
-  // Label: se for ato, mostra "NOME · Ato X"
   const label = stand._isAto
     ? `#${String(num).padStart(3, "0")} ${stand._parentNome} · Ato ${stand._numAto}`
     : `#${String(num).padStart(3, "0")} ${stand.nome}`;
@@ -521,17 +519,16 @@ function adicionarHistorico(stand, num) {
   chips.insertBefore(chip, chips.firstChild);
 }
 
-// ─────────────────────────────────────────────
-// COPIAR
-// ─────────────────────────────────────────────
+// ────────────────────────────────────────────
 function copiarStand() {
   if (!standAtual) return;
   const s     = standAtual;
   const stats = Object.entries(s.stats || {}).map(([k, v]) => `${STAT_LABELS[k]}: ${v}`).join(" | ");
   const tecns = (s.tecnicas || []).map(t => `${t.nome} (${t.tipo}): ${t.descricao}`).join("\n");
   const refs  = (s.referenciasMusicais || []).map(r => `${r.nome} - ${r.artista}`).join(", ");
-  const atoInfo = s._isAto ? `\nAto: ${s._numAto} de ${s._totalAtos}` : "";
-  const texto = `=== ${s.nome} ===${atoInfo}\n${s.tema}\nTipo: ${s.tipoManifestacao}\n\nHabilidade: ${s.habilidadePrincipal}\n\nDescrição: ${s.descricao}\n\nAparência: ${s.aparencia}\n\nFraquezas: ${s.fraquezas}\n\nStats: ${stats}\n\nTécnicas:\n${tecns}\n\nUsuário: ${s.usuario?.nome} — ${s.usuario?.descricao}\nFrase: "${s.usuario?.fraseIconica}"\n\nReferências: ${refs}`;
+  const atoInfo   = s._isAto ? `\nAto: ${s._numAto} de ${s._totalAtos}` : "";
+  const transInfo = s._isAto && s.condicaoTransicao ? `\nTransição para este Ato: ${s.condicaoTransicao}` : "";
+  const texto = `=== ${s.nome} ===${atoInfo}${transInfo}\n${s.tema}\nTipo: ${s.tipoManifestacao}\n\nHabilidade: ${s.habilidadePrincipal}\n\nDescrição: ${s.descricao}\n\nAparência: ${s.aparencia}\n\nFraquezas: ${s.fraquezas}\n\nStats: ${stats}\n\nTécnicas:\n${tecns}\n\nUsuário: ${s.usuario?.nome} — ${s.usuario?.descricao}\nFrase: "${s.usuario?.fraseIconica}"\n\nReferências: ${refs}`;
   navigator.clipboard.writeText(texto).then(() => {
     const btn = document.querySelector(".copy-btn");
     btn.textContent = "✅ Copiado!";
@@ -539,9 +536,7 @@ function copiarStand() {
   });
 }
 
-// ─────────────────────────────────────────────
-// LOAD / CLEAR HISTORY
-// ─────────────────────────────────────────────
+// ────────────────────────────────────────────
 function loadHistory() {
   try {
     const stored = localStorage.getItem("stand_history");
@@ -572,11 +567,9 @@ function clearHistory() {
   standAtual = null;
 }
 
-// ─────────────────────────────────────────────
-// INIT
-// ─────────────────────────────────────────────
+// ────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
-  const btnClear       = document.getElementById("btnClearHistory");
+  const btnClear = document.getElementById("btnClearHistory");
   if (btnClear) btnClear.onclick = clearHistory;
 
   const providerSelect = document.getElementById("apiProvider");
