@@ -94,65 +94,69 @@
     <div class="error-box" id="errorBox"></div>
 
     <div class="card" id="card">
-      <div class="card-header">
-        <div class="card-number" id="cardNumero">#001</div>
-        <div class="card-name" id="cardNome">Carregando</div>
-        <div class="card-category" id="cardTema">Tema Desconhecido</div>
-        <div class="types" id="cardTipos"></div>
-      </div>
+      <div class="card-grid">
 
-      <div style="margin-bottom:16px;">
-        <div class="section-label">Habilidade Principal</div>
-        <div class="dex-entry" id="cardHabilidade"></div>
-      </div>
+        <div>
+          <div class="card-number" id="cardNumero">#001</div>
+          <div class="card-name" id="cardNome">Carregando</div>
+          <div class="card-category" id="cardTema">Tema Desconhecido</div>
+          <div class="types" id="cardTipos"></div>
+        </div>
 
-      <div style="margin-bottom:16px;">
-        <div class="section-label">Descri&#231;&#227;o</div>
-        <div class="dex-entry" id="cardDescricao"></div>
-      </div>
+        <div>
+          <div class="section-label">Habilidade Principal</div>
+          <div class="dex-entry" id="cardHabilidade"></div>
+        </div>
 
-      <!-- LINHA DE ATOS -->
-      <div style="margin-bottom:16px;" id="atoLineSection" style="display:none;">
-        <div class="section-label">Linha de Atos</div>
-        <div class="ato-line" id="atoLine"></div>
-      </div>
+        <div>
+          <div class="section-label">Descri&#231;&#227;o</div>
+          <div class="dex-entry" id="cardDescricao"></div>
+        </div>
 
-      <div style="margin-bottom:16px;">
-        <div class="section-label">Fraquezas &amp; Limita&#231;&#245;es</div>
-        <div class="dex-entry" id="cardFraquezas"></div>
-      </div>
+        <!-- LINHA DE ATOS -->
+        <div id="atoLineSection" style="display:none;">
+          <div class="section-label">Linha de Atos</div>
+          <div class="ato-line" id="atoLine"></div>
+        </div>
 
-      <div style="margin-bottom:16px;">
-        <div class="section-label">T&#233;cnicas</div>
-        <div id="tecnicasList"></div>
-      </div>
+        <div>
+          <div class="section-label">Fraquezas &amp; Limita&#231;&#245;es</div>
+          <div class="dex-entry" id="cardFraquezas"></div>
+        </div>
 
-      <!-- BOTOES DE ACAO -->
-      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px;">
-        <button class="copy-btn" onclick="copiarStand()">&#128203; Copiar texto</button>
-        <button class="btn-requiem" id="btnRequiem" style="display:none;" onclick="gerarRequiem()">&#9760;&#65039; Transformar em R&#233;quiem</button>
-      </div>
+        <div>
+          <div class="section-label">T&#233;cnicas</div>
+          <div id="tecnicasList"></div>
+        </div>
 
-      <div id="promptContainer" style="margin-bottom:16px;"></div>
+        <!-- BOTOES DE ACAO -->
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button class="copy-btn" onclick="copiarStand()">&#128203; Copiar texto</button>
+          <button class="btn-requiem" id="btnRequiem" style="display:none;" onclick="gerarRequiem()">&#9760;&#65039; Transformar em R&#233;quiem</button>
+        </div>
 
-      <div style="margin-bottom:16px;">
-        <div class="section-label">Estat&#237;sticas</div>
-        <div class="stats-grid" id="statsGrid"></div>
-      </div>
+        <div id="promptContainer"></div>
 
-      <div style="margin-bottom:16px;">
-        <div class="section-label">Detalhes do Stand</div>
-        <div class="detalhes-row" id="detalhesRow"></div>
-      </div>
+        <div>
+          <div class="section-label">Estat&#237;sticas</div>
+          <div class="stats-grid" id="statsGrid"></div>
+        </div>
 
-      <div style="margin-bottom:16px;">
-        <div class="section-label">Usu&#225;rio</div>
-        <div id="usuarioBox"></div>
-      </div>
+        <div>
+          <div class="section-label">Detalhes do Stand</div>
+          <div class="detalhes-row" id="detalhesRow"></div>
+        </div>
 
-      <div style="margin-bottom:16px;">
-        <div class="section-label">Refer&#234;ncias Musicais</div>
-        <div id="refMusicais"></div>
+        <div>
+          <div class="section-label">Usu&#225;rio</div>
+          <div id="usuarioBox"></div>
+        </div>
+
+        <div>
+          <div class="section-label">Refer&#234;ncias Musicais</div>
+          <div id="refMusicais"></div>
+        </div>
+
       </div>
     </div>
 
