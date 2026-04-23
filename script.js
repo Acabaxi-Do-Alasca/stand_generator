@@ -21,7 +21,7 @@ const MODELS = {
   ]
 };
 
-const STAT_RANKS = ["E", "D", "C", "B", "A", "Infinito"];
+const STAT_RANKS  = ["E", "D", "C", "B", "A", "Infinito"];
 const STAT_COLORS = {
   poderDestrutivo: "#ef4444",
   velocidade:      "#facc15",
@@ -41,21 +41,21 @@ const STAT_LABELS = {
 const RANK_WIDTH = { E: 10, D: 27, C: 45, B: 65, A: 82, "Infinito": 100 };
 
 let sessionStands = {};
-let standAtual = null;
-let contador = 0;
-let savedHistory = [];
+let standAtual    = null;
+let contador      = 0;
+let savedHistory  = [];
 
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function resolverFiltro(val, opts) { return val === "aleatorio" ? pick(opts) : val; }
 
-function resolverFiltro(val, opts) {
-  return val === "aleatorio" ? pick(opts) : val;
-}
-
+// ─────────────────────────────────────────────
+// GERAR
+// ─────────────────────────────────────────────
 async function gerarStand() {
-  const btnGerar = document.getElementById("btnGerar");
-  const loading = document.getElementById("loading");
-  const card = document.getElementById("card");
-  const errorBox = document.getElementById("errorBox");
+  const btnGerar  = document.getElementById("btnGerar");
+  const loading   = document.getElementById("loading");
+  const card      = document.getElementById("card");
+  const errorBox  = document.getElementById("errorBox");
 
   const tipoManifestacao = resolverFiltro(
     document.getElementById("tipoManifestacao").value,
@@ -71,7 +71,6 @@ async function gerarStand() {
   errorBox.classList.remove("visible");
   loading.classList.add("visible");
 
-  // Randomizações temáticas (equivalente aos métodos de evolução do Fakemon)
   const temasInspiracoes = [
     "música clássica (Beethoven, Mozart, Bach)",
     "rock e heavy metal (AC/DC, Metallica, Led Zeppelin)",
@@ -89,7 +88,6 @@ async function gerarStand() {
     "country e bluegrass",
     "música eletrônica brasileira (baile funk, axé, forró)"
   ];
-
   const categoriasTipo = [
     "Stand de manipulação temporal (parar, reverter, acelerar o tempo)",
     "Stand de manipulação espacial (portais, dobramento de espaço)",
@@ -111,25 +109,50 @@ async function gerarStand() {
   const temaInsp = pick(temasInspiracoes);
   const catTipo  = pick(categoriasTipo);
 
+  // Quantidade de atos aleatória (2 a 4) quando for Ato
+  const numAtos = tipoManifestacao === "Ato" ? (Math.floor(Math.random() * 3) + 2) : 0;
+
   const instrucaoExtra = `
 --- FATORES ALEATÓRIOS OBRIGATÓRIOS ---
 TEMA MUSICAL DE REFERÊNCIA: ${temaInsp}
 CATEGORIA DO PODER: ${catTipo}
 TIPO DE MANIFESTAÇÃO DEFINIDO: ${tipoManifestacao}
 PODER DESTRUTIVO DEFINIDO: ${poderDestrutivo}
+${tipoManifestacao === "Ato" ? `QUANTIDADE DE ATOS: ${numAtos} (OBRIGATÓRIO gerar exatamente ${numAtos} atos no array "atos")` : ""}
 --------------------------------------`;
+
+  // ── Bloco de instrução extra para Ato no prompt ──
+  const blocoAto = tipoManifestacao === "Ato" ? `
+COMO ESTE STAND É DO TIPO "ATO", o JSON deve conter o campo "atos" (array) NO LUGAR de "tecnicas", "stats", "aparencia" e "habilidadePrincipal" no nível raiz.
+Cada ato é uma fase distinta do Stand (como Crazy Diamond Act 1, 2, 3...), com aparência, habilidade, stats e técnicas próprios.
+Estrutura obrigatória do array "atos":
+[
+  {
+    "ato": 1,
+    "nome": "NOME DO STAND: ACT 1",
+    "aparencia": "Descrição visual do Ato 1.",
+    "habilidadePrincipal": "Habilidade específica do Ato 1.",
+    "descricao": "Comportamento e personalidade do Ato 1.",
+    "fraquezas": "Limitações do Ato 1.",
+    "stats": { "poderDestrutivo": "C", "velocidade": "B", "alcance": "C", "persistencia": "B", "precisao": "C", "potencialDesenv": "A" },
+    "tecnicas": [ { "nome": "Técnica", "descricao": "Descrição.", "tipo": "ofensiva" } ]
+  }
+]
+Os Atos devem evoluir progressivamente: o Ato 1 é mais simples/fraco, o último é o mais poderoso.
+Os campos "aparencia", "habilidadePrincipal", "descricao", "fraquezas", "stats" e "tecnicas" AINDA devem existir no nível raiz do JSON (use os dados do Ato FINAL como referência para o nível raiz).
+` : "";
 
   const prompt = `Você é um criador de Stands de JoJo's Bizarre Adventure. Crie um Stand completamente original e criativo.
 
 Retorne SOMENTE um JSON válido (sem markdown, sem blocos de código, sem texto extra) com esta estrutura exata:
 {
   "nome": "NOME DO STAND EM CAIXA ALTA (referência musical)",
-  "tema": "Breve explicação da referência musical/cultural (ex: baseado no álbum X da banda Y)",
-  "tipoManifestacao": "Humanóide",
-  "aparencia": "Descrição visual detalhada do Stand em 2-3 frases (cores, forma, tamanho, características marcantes).",
-  "habilidadePrincipal": "Nome e descrição completa da habilidade principal do Stand (2-3 frases).",
-  "descricao": "Descrição geral do Stand, seu comportamento e personalidade se houver (2-3 frases).",
-  "fraquezas": "Limitações, fraquezas e condições de uso do Stand (2-3 frases).",
+  "tema": "Breve explicação da referência musical/cultural",
+  "tipoManifestacao": "${tipoManifestacao}",
+  "aparencia": "Descrição visual detalhada do Stand em 2-3 frases.",
+  "habilidadePrincipal": "Nome e descrição completa da habilidade principal (2-3 frases).",
+  "descricao": "Descrição geral do Stand, comportamento e personalidade (2-3 frases).",
+  "fraquezas": "Limitações, fraquezas e condições de uso (2-3 frases).",
   "stats": {
     "poderDestrutivo": "B",
     "velocidade": "A",
@@ -139,58 +162,47 @@ Retorne SOMENTE um JSON válido (sem markdown, sem blocos de código, sem texto 
     "potencialDesenv": "C"
   },
   "tecnicas": [
-    {
-      "nome": "Nome da Técnica",
-      "descricao": "Descrição detalhada da técnica em português.",
-      "tipo": "ofensiva"
-    }
+    { "nome": "Nome da Técnica", "descricao": "Descrição detalhada.", "tipo": "ofensiva" }
   ],
+  "atos": [],
   "usuario": {
     "nome": "Nome do Usuário",
-    "descricao": "Breve descrição do usuário em português (personalidade, origem, motivação).",
-    "fraseIconica": "Uma frase marcante que o usuário diria ao ativar o Stand."
+    "descricao": "Breve descrição (personalidade, origem, motivação).",
+    "fraseIconica": "Frase marcante ao ativar o Stand."
   },
   "detalhes": {
     "alcanceMetros": "5 metros",
     "velocidadeDetalhada": "Suprassônica em combate direto",
-    "grito": "ORA ORA ORA / MUDA MUDA / etc. (ou criativo)",
-    "fraseAtivacao": "Frase que o usuário diz ao invocar o Stand"
+    "grito": "ORA ORA ORA",
+    "fraseAtivacao": "Frase ao invocar o Stand"
   },
   "referenciasMusicais": [
-    {
-      "nome": "Nome da música/álbum",
-      "artista": "Nome do artista",
-      "relacao": "Como se relaciona com o Stand"
-    }
+    { "nome": "Nome da música/álbum", "artista": "Nome do artista", "relacao": "Como se relaciona com o Stand" }
   ]
 }
+
+${blocoAto}
 
 REGRAS OBRIGATÓRIAS:
 
 === STATS ===
-Os stats usam escala: E (mínimo), D, C, B, A, Infinito (supremo).
-Distribua de forma ASSIMÉTRICA e temática — o Stand deve ter pontos fortes e fracos claros.
-Exemplos de distribuição boa:
-- Stand velocista: Poder:C, Velocidade:A, Alcance:D, Persistência:B, Precisão:A, Pot:B
-- Stand tanque: Poder:A, Velocidade:D, Alcance:C, Persistência:A, Precisão:C, Pot:B
-- Stand de longa distância: Poder:B, Velocidade:C, Alcance:A, Persistência:A, Precisão:A, Pot:C
+Escala: E (mínimo), D, C, B, A, Infinito (supremo). Distribua de forma ASSIMÉTRICA.
 
 === TÉCNICAS ===
-Crie entre 3 e 5 técnicas. Cada uma com nome criativo, descrição e tipo (ofensiva/defensiva/suporte/especial).
-Técnicas devem ser coerentes com a habilidade principal.
+Crie 3 a 5 técnicas. Tipo: ofensiva/defensiva/suporte/especial.
 
 === NOME ===
-O nome DEVE ser uma referência musical real (banda, álbum, música, artista). Ex: KILLER QUEEN, CRAZY DIAMOND, GOLD EXPERIENCE, STICKY FINGERS, BOHEMIAN RHAPSODY.
+Deve ser referência musical real. Ex: KILLER QUEEN, CRAZY DIAMOND, GOLD EXPERIENCE.
 
 === USUÁRIO ===
-Crie um usuário original (não use personagens do mangá). Dê nome, personalidade e motivação.
+Personagem original (não use personagens do mangá).
 
 === REFERÊNCIAS MUSICAIS ===
-Liste 2-4 músicas/álbuns que inspiraram o Stand.
+Liste 2 a 4 músicas/álbuns que inspiraram o Stand.
 
 === OUTROS ===
 - Todo texto descritivo em PORTUGUÊS.
-- O Stand deve ter personalidade e conceito únicos — evite clones de Stands existentes.
+- Stand com conceito único — evite clones de Stands existentes.
 - tipoManifestacao e poderDestrutivo devem seguir EXATAMENTE os fatores aleatórios abaixo.
 ${instrucaoExtra}`;
 
@@ -198,11 +210,9 @@ ${instrucaoExtra}`;
     const provider = document.getElementById("apiProvider")?.value || "gemini";
     const model    = document.getElementById("apiModel")?.value   || "gemini-2.5-flash";
     const apiKey   = document.getElementById("apiKey")?.value?.trim();
-
     if (!apiKey) throw new Error("Por favor, insira sua API Key nas configurações.");
 
     let raw = "";
-
     if (provider === "gemini") {
       const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
         method: "POST",
@@ -232,14 +242,33 @@ ${instrucaoExtra}`;
     const stand = JSON.parse(raw);
     standAtual = stand;
 
-    contador++;
-    sessionStands[stand.nome] = { stand, num: contador };
-    savedHistory.push({ stand, num: contador });
+    const geradosNestaSessao = [];
+
+    // ── SE FOR ATO: cada ato vira um card separado (igual evolucao[] do Fakemon) ──
+    if (stand.tipoManifestacao === "Ato" && stand.atos && stand.atos.length > 0) {
+      stand.atos.forEach(ato => {
+        contador++;
+        // Monta objeto completo do ato herdando campos do stand pai
+        const atoObj = buildAtoObject(ato, stand);
+        sessionStands[atoObj._chave] = { stand: atoObj, num: contador };
+        geradosNestaSessao.push({ stand: atoObj, num: contador });
+      });
+    } else {
+      // Stand normal — um único card
+      contador++;
+      sessionStands[stand.nome] = { stand, num: contador };
+      geradosNestaSessao.push({ stand, num: contador });
+    }
+
+    geradosNestaSessao.forEach(item => savedHistory.push({ stand: item.stand, num: item.num }));
     localStorage.setItem("stand_history", JSON.stringify(savedHistory));
     localStorage.setItem("stand_contador", contador.toString());
 
-    adicionarHistorico(stand, contador);
-    renderCard(stand, contador);
+    // Chips em ordem inversa (menor número aparece mais abaixo, igual ao Fakemon)
+    [...geradosNestaSessao].reverse().forEach(item => adicionarHistorico(item.stand, item.num));
+
+    // Exibe o Ato 1 (ou o único stand)
+    renderCard(geradosNestaSessao[0].stand, geradosNestaSessao[0].num);
 
   } catch(e) {
     document.getElementById("errorBox").textContent = "⚠️ Erro: " + e.message;
@@ -250,22 +279,60 @@ ${instrucaoExtra}`;
   }
 }
 
+// ─────────────────────────────────────────────
+// BUILD ATO OBJECT  (equivalente ao buildStageObject do Fakemon)
+// ─────────────────────────────────────────────
+function buildAtoObject(ato, parent) {
+  return {
+    // Identificação
+    nome:              ato.nome || `${parent.nome}: ACT ${ato.ato}`,
+    _chave:            `${parent.nome}__ato${ato.ato}`,
+    tema:              parent.tema,
+    tipoManifestacao:  parent.tipoManifestacao,
+    // Campos próprios do ato
+    aparencia:         ato.aparencia         || parent.aparencia,
+    habilidadePrincipal: ato.habilidadePrincipal || parent.habilidadePrincipal,
+    descricao:         ato.descricao         || parent.descricao,
+    fraquezas:         ato.fraquezas         || parent.fraquezas,
+    stats:             ato.stats             || parent.stats,
+    tecnicas:          ato.tecnicas          || parent.tecnicas,
+    // Campos herdados do stand pai
+    usuario:           parent.usuario,
+    detalhes:          parent.detalhes,
+    referenciasMusicais: parent.referenciasMusicais,
+    // Metadados para navegação
+    _isAto:            true,
+    _numAto:           ato.ato,
+    _parentNome:       parent.nome,
+    _totalAtos:        parent.atos.length,
+    _atos:             parent.atos
+  };
+}
+
+// ─────────────────────────────────────────────
+// RENDER CARD
+// ─────────────────────────────────────────────
 function renderCard(stand, num) {
-  document.getElementById("cardNome").textContent    = stand.nome;
-  document.getElementById("cardTema").textContent    = stand.tema || "";
-  document.getElementById("cardNumero").textContent  = `#${String(num).padStart(3, "0")}`;
+  document.getElementById("cardNome").textContent   = stand.nome;
+  document.getElementById("cardTema").textContent   = stand.tema || "";
+  document.getElementById("cardNumero").textContent = `#${String(num).padStart(3, "0")}`;
   document.getElementById("cardHabilidade").textContent = stand.habilidadePrincipal || "";
   document.getElementById("cardDescricao").textContent  = stand.descricao || "";
   document.getElementById("cardFraquezas").textContent  = stand.fraquezas || "";
 
-  // Tipos (tipo de manifestação)
+  // ── Badges de tipo ──
   const tiposEl = document.getElementById("cardTipos");
   tiposEl.innerHTML = "";
   const TIPO_COLORS = {
     "Humanóide": "#7c3aed", "Distante": "#38bdf8", "Automático": "#f97316",
     "Colônia": "#4ade80",   "Vinculado": "#f472b6", "Ato": "#facc15"
   };
-  [stand.tipoManifestacao, stand.stats?.poderDestrutivo ? `Poder ${stand.stats.poderDestrutivo}` : null].filter(Boolean).forEach(t => {
+
+  // Se for Ato, exibe badge de qual ato é
+  const tipoLabel = stand._isAto ? `Ato ${stand._numAto} de ${stand._totalAtos}` : stand.tipoManifestacao;
+  [stand.tipoManifestacao, tipoLabel !== stand.tipoManifestacao ? tipoLabel : null,
+   stand.stats?.poderDestrutivo ? `Poder ${stand.stats.poderDestrutivo}` : null
+  ].filter(Boolean).forEach(t => {
     const b = document.createElement("span");
     b.className = "type-badge";
     b.textContent = t;
@@ -274,10 +341,11 @@ function renderCard(stand, num) {
     tiposEl.appendChild(b);
   });
 
-  // Prompt de imagem
+  // ── Prompt de imagem ──
   const pc = document.getElementById("promptContainer");
   const apparence = (stand.aparencia || "").replace(/"/g, "'");
-  const imgPrompt = `JoJo's Bizarre Adventure Stand, manga style, Araki art style, dramatic lighting, isolated on white background. Stand named ${stand.nome}. Type: ${stand.tipoManifestacao}. Appearance: ${apparence}. Detailed, stylized, bold outlines, high contrast.`;
+  const atoLabel  = stand._isAto ? ` Act ${stand._numAto}` : "";
+  const imgPrompt = `JoJo's Bizarre Adventure Stand, manga style, Araki art style, dramatic lighting, isolated on white background. Stand named ${stand.nome}${atoLabel}. Type: ${stand.tipoManifestacao}. Appearance: ${apparence}. Detailed, stylized, bold outlines, high contrast.`;
   pc.innerHTML = `
     <div style="font-size:0.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;">Prompt para Gerar Imagem</div>
     <div style="display:flex;gap:10px;align-items:center;">
@@ -288,7 +356,51 @@ function renderCard(stand, num) {
       <strong>Obs:</strong> Recomenda-se o <a href="https://leonardo.ai" target="_blank" style="color:#38bdf8;text-decoration:underline;">Leonardo.ai</a> para gerar a imagem.
     </div>`;
 
-  // Stats (ranks)
+  // ── Linha de Atos (equivalente ao evoLine do Fakemon) ──
+  const atoLineSection = document.getElementById("atoLineSection");
+  const atoLine        = document.getElementById("atoLine");
+  if (stand._isAto && stand._atos && stand._atos.length > 1) {
+    atoLineSection.style.display = "block";
+    atoLine.innerHTML = "";
+    stand._atos.forEach((a, idx) => {
+      const chave     = `${stand._parentNome}__ato${a.ato}`;
+      const isCurrent = a.ato === stand._numAto;
+
+      if (idx > 0) {
+        const arr = document.createElement("div");
+        arr.style.cssText = "display:flex;flex-direction:column;align-items:center;padding-top:4px;gap:2px;";
+        arr.innerHTML = `<span class="evo-arrow">→</span>`;
+        atoLine.appendChild(arr);
+      }
+
+      const el = document.createElement("div");
+      el.className = "evo-stage";
+
+      const nameDiv = document.createElement("div");
+      nameDiv.className = "evo-name" + (isCurrent ? " current" : " clickable");
+      nameDiv.textContent = `Ato ${a.ato}`;
+      nameDiv.title = a.nome || "";
+      if (!isCurrent && sessionStands[chave]) {
+        nameDiv.onclick = () => {
+          const entry = sessionStands[chave];
+          renderCard(entry.stand, entry.num);
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        };
+      }
+
+      const labelDiv = document.createElement("div");
+      labelDiv.className = "evo-label";
+      labelDiv.textContent = idx === stand._atos.length - 1 ? `Ato ${a.ato} (Final)` : `Ato ${a.ato}`;
+
+      el.appendChild(nameDiv);
+      el.appendChild(labelDiv);
+      atoLine.appendChild(el);
+    });
+  } else {
+    atoLineSection.style.display = "none";
+  }
+
+  // ── Stats ──
   const statsGrid = document.getElementById("statsGrid");
   statsGrid.innerHTML = `
     <div style="grid-column:1/-1;display:grid;grid-template-columns:140px 60px 1fr;gap:6px;align-items:center;margin-bottom:4px;">
@@ -296,7 +408,6 @@ function renderCard(stand, num) {
       <span style="font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;text-align:center;">Rank</span>
       <span></span>
     </div>`;
-
   const stats = stand.stats || {};
   Object.entries(stats).forEach(([key, rank]) => {
     const color = STAT_COLORS[key] || "#888";
@@ -311,7 +422,7 @@ function renderCard(stand, num) {
       </div>`;
   });
 
-  // Técnicas
+  // ── Técnicas ──
   const tecList = document.getElementById("tecnicasList");
   tecList.innerHTML = "";
   (stand.tecnicas || []).forEach(t => {
@@ -325,8 +436,8 @@ function renderCard(stand, num) {
     </div>`;
   });
 
-  // Detalhes
-  const det = stand.detalhes || {};
+  // ── Detalhes ──
+  const det    = stand.detalhes || {};
   const detRow = document.getElementById("detalhesRow");
   detRow.innerHTML = `
     <div class="ability-box">
@@ -338,8 +449,8 @@ function renderCard(stand, num) {
       </div>
     </div>`;
 
-  // Usuário
-  const usr = stand.usuario || {};
+  // ── Usuário ──
+  const usr    = stand.usuario || {};
   const usrBox = document.getElementById("usuarioBox");
   usrBox.innerHTML = `
     <div class="ability-box">
@@ -348,7 +459,7 @@ function renderCard(stand, num) {
       ${usr.fraseIconica ? `<div style="margin-top:6px;font-size:0.78rem;color:#facc15;font-style:italic;">"${usr.fraseIconica}"</div>` : ""}
     </div>`;
 
-  // Referências musicais
+  // ── Referências musicais ──
   const refList = document.getElementById("refMusicais");
   refList.innerHTML = "";
   (stand.referenciasMusicais || []).forEach(r => {
@@ -363,29 +474,37 @@ function renderCard(stand, num) {
   document.getElementById("card").classList.add("visible");
 }
 
+// ─────────────────────────────────────────────
+// HISTÓRICO
+// ─────────────────────────────────────────────
 function adicionarHistorico(stand, num) {
   const chips = document.getElementById("historyChips");
   const chip  = document.createElement("div");
   chip.className = "chip";
   chip.style.cssText = "display:flex;align-items:center;gap:6px;padding-right:4px;";
 
+  // Label: se for ato, mostra "NOME · Ato X"
+  const label = stand._isAto
+    ? `#${String(num).padStart(3, "0")} ${stand._parentNome} · Ato ${stand._numAto}`
+    : `#${String(num).padStart(3, "0")} ${stand.nome}`;
+
   const textSpan = document.createElement("span");
-  textSpan.textContent = `#${String(num).padStart(3, "0")} ${stand.nome}`;
-  textSpan.onclick = e => { e.stopPropagation(); renderCard(stand, num); window.scrollTo({top:0,behavior:"smooth"}); };
+  textSpan.textContent = label;
+  textSpan.onclick = e => { e.stopPropagation(); renderCard(stand, num); window.scrollTo({ top: 0, behavior: "smooth" }); };
 
   const delBtn = document.createElement("span");
   delBtn.innerHTML = "×";
   delBtn.style.cssText = "color:#ef4444;font-weight:bold;cursor:pointer;padding:0 4px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background 0.2s;";
-  delBtn.title = "Excluir Stand";
+  delBtn.title = "Excluir";
   delBtn.onmouseover = () => delBtn.style.background = "rgba(239,68,68,0.2)";
   delBtn.onmouseout  = () => delBtn.style.background = "transparent";
   delBtn.onclick = e => {
     e.stopPropagation();
-    if (confirm(`Excluir ${stand.nome}?`)) {
+    if (confirm(`Excluir ${label}?`)) {
       savedHistory = savedHistory.filter(i => i.num !== num);
       localStorage.setItem("stand_history", JSON.stringify(savedHistory));
       chip.remove();
-      if (standAtual?.nome === stand.nome) {
+      if (standAtual?.nome === stand.nome || standAtual?._chave === stand._chave) {
         if (savedHistory.length > 0) {
           const last = savedHistory[savedHistory.length - 1];
           renderCard(last.stand, last.num);
@@ -402,13 +521,17 @@ function adicionarHistorico(stand, num) {
   chips.insertBefore(chip, chips.firstChild);
 }
 
+// ─────────────────────────────────────────────
+// COPIAR
+// ─────────────────────────────────────────────
 function copiarStand() {
   if (!standAtual) return;
-  const s = standAtual;
-  const stats  = Object.entries(s.stats || {}).map(([k, v]) => `${STAT_LABELS[k]}: ${v}`).join(" | ");
-  const tecns  = (s.tecnicas || []).map(t => `${t.nome} (${t.tipo}): ${t.descricao}`).join("\n");
-  const refs   = (s.referenciasMusicais || []).map(r => `${r.nome} - ${r.artista}`).join(", ");
-  const texto  = `=== ${s.nome} ===\n${s.tema}\nTipo: ${s.tipoManifestacao}\n\nHabilidade: ${s.habilidadePrincipal}\n\nDescrição: ${s.descricao}\n\nAparência: ${s.aparencia}\n\nFraquezas: ${s.fraquezas}\n\nStats: ${stats}\n\nTécnicas:\n${tecns}\n\nUsuário: ${s.usuario?.nome} — ${s.usuario?.descricao}\nFrase: "${s.usuario?.fraseIconica}"\n\nReferências: ${refs}`;
+  const s     = standAtual;
+  const stats = Object.entries(s.stats || {}).map(([k, v]) => `${STAT_LABELS[k]}: ${v}`).join(" | ");
+  const tecns = (s.tecnicas || []).map(t => `${t.nome} (${t.tipo}): ${t.descricao}`).join("\n");
+  const refs  = (s.referenciasMusicais || []).map(r => `${r.nome} - ${r.artista}`).join(", ");
+  const atoInfo = s._isAto ? `\nAto: ${s._numAto} de ${s._totalAtos}` : "";
+  const texto = `=== ${s.nome} ===${atoInfo}\n${s.tema}\nTipo: ${s.tipoManifestacao}\n\nHabilidade: ${s.habilidadePrincipal}\n\nDescrição: ${s.descricao}\n\nAparência: ${s.aparencia}\n\nFraquezas: ${s.fraquezas}\n\nStats: ${stats}\n\nTécnicas:\n${tecns}\n\nUsuário: ${s.usuario?.nome} — ${s.usuario?.descricao}\nFrase: "${s.usuario?.fraseIconica}"\n\nReferências: ${refs}`;
   navigator.clipboard.writeText(texto).then(() => {
     const btn = document.querySelector(".copy-btn");
     btn.textContent = "✅ Copiado!";
@@ -416,6 +539,9 @@ function copiarStand() {
   });
 }
 
+// ─────────────────────────────────────────────
+// LOAD / CLEAR HISTORY
+// ─────────────────────────────────────────────
 function loadHistory() {
   try {
     const stored = localStorage.getItem("stand_history");
@@ -425,7 +551,8 @@ function loadHistory() {
     savedHistory = history;
     history.forEach(item => {
       if (item.stand && item.num) {
-        sessionStands[item.stand.nome] = { stand: item.stand, num: item.num };
+        const chave = item.stand._chave || item.stand.nome;
+        sessionStands[chave] = { stand: item.stand, num: item.num };
         adicionarHistorico(item.stand, item.num);
         if (item.num > contador) contador = item.num;
       }
@@ -437,7 +564,7 @@ function loadHistory() {
 
 function clearHistory() {
   if (!confirm("Limpar todo o histórico?")) return;
-  savedHistory = [];
+  savedHistory  = [];
   sessionStands = {};
   localStorage.removeItem("stand_history");
   document.getElementById("historyChips").innerHTML = "";
@@ -445,8 +572,11 @@ function clearHistory() {
   standAtual = null;
 }
 
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
-  const btnClear = document.getElementById("btnClearHistory");
+  const btnClear       = document.getElementById("btnClearHistory");
   if (btnClear) btnClear.onclick = clearHistory;
 
   const providerSelect = document.getElementById("apiProvider");
