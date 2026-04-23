@@ -33,7 +33,7 @@
           <input type="password" id="apiKey" placeholder="Cole sua chave aqui..." style="width: 100%; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 10px; font-size: 0.9rem; outline:none;">
         </div>
       </div>
-      <button class="btn" style="width: 100%; padding: 10px; font-size: 0.85rem;" onclick="document.getElementById('apiModalOverlay').classList.remove('visible')">Salvar & Fechar</button>
+      <button class="btn" style="width: 100%; padding: 10px; font-size: 0.85rem;" onclick="document.getElementById('apiModalOverlay').classList.remove('visible')">Salvar &amp; Fechar</button>
     </div>
   </div>
 
@@ -119,7 +119,15 @@
 
           <div id="promptContainer" style="margin-top:15px;"></div>
 
-          <div class="section-label" style="margin-top: 24px;">Fraquezas & Limitações</div>
+          <!-- LINHA DE ATOS — só visível em Stands do tipo Ato -->
+          <div id="atoLineSection" style="display:none; margin-top:24px;">
+            <div class="section-label">Linha de Atos</div>
+            <div class="evo-section">
+              <div class="evo-line" id="atoLine"></div>
+            </div>
+          </div>
+
+          <div class="section-label" style="margin-top: 24px;">Fraquezas &amp; Limitações</div>
           <div class="dex-entry" id="cardFraquezas"></div>
 
           <div class="section-label" style="margin-top: 24px;">Técnicas</div>
