@@ -13,7 +13,7 @@
   <div class="modal-overlay" id="apiModalOverlay">
     <div class="modal-content">
       <button class="modal-close" onclick="document.getElementById('apiModalOverlay').classList.remove('visible')">&times;</button>
-      <div class="modal-title">⚙️ Provedor de IA (BYOK)</div>
+      <div class="modal-title">&#9881;&#65039; Provedor de IA (BYOK)</div>
       <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
         <div>
           <label style="display: block; font-size: 0.75rem; color: var(--muted); margin-bottom: 4px;">Provedor</label>
@@ -33,136 +33,130 @@
           <input type="password" id="apiKey" placeholder="Cole sua chave aqui..." style="width: 100%; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 10px; font-size: 0.9rem; outline:none;">
         </div>
       </div>
-      <button class="btn" style="width: 100%; padding: 10px; font-size: 0.85rem;" onclick="document.getElementById('apiModalOverlay').classList.remove('visible')">Salvar &amp; Fechar</button>
+      <button class="btn" style="width: 100%; padding: 10px; font-size: 0.85rem;"
+        onclick="document.getElementById('apiModalOverlay').classList.remove('visible')">Salvar &amp; Fechar</button>
     </div>
   </div>
 
   <!-- BARRA LATERAL -->
   <aside class="sidebar">
     <div class="sidebar-header">
-      <h1>👁️ Stand AI</h1>
-      <div class="subtitle">Gerador inteligente de Stands</div>
+      <div class="logo">&#128065;&#65039; Stand AI</div>
+      <div class="logo-sub">Gerador inteligente de Stands</div>
     </div>
 
-    <div class="history-section">
-      <div class="history-title">
-        <span>Histórico</span>
-        <span id="btnClearHistory" style="color: #ef4444; cursor: pointer; text-transform: none; letter-spacing: normal;">Limpar</span>
-      </div>
-      <div class="history-chips" id="historyChips"></div>
+    <div style="display:flex; gap:6px; margin-bottom:8px;">
+      <button class="btn btn-secondary" style="flex:1; font-size:0.75rem; padding:7px;" onclick="document.getElementById('historyPanel').classList.toggle('open')">&#128221; Hist&#243;rico</button>
+      <button class="btn btn-danger" id="btnClearHistory" style="flex:1; font-size:0.75rem; padding:7px;">&#128465; Limpar</button>
     </div>
 
-    <div class="sidebar-footer">
-      <button class="settings-btn" onclick="document.getElementById('apiModalOverlay').classList.add('visible')">
-        ⚙️ Configurar API Key
-      </button>
+    <button class="btn btn-secondary" style="width:100%; margin-bottom:12px; font-size:0.8rem;"
+      onclick="document.getElementById('apiModalOverlay').classList.add('visible')">&#9881;&#65039; Configurar API Key</button>
 
-      <div class="controls">
-        <div class="filter-row">
-          <div>
-            <label style="font-size:0.7rem;color:var(--muted);display:block;margin-bottom:3px;">Tipo de Manifestação</label>
-            <select id="tipoManifestacao">
-              <option value="aleatorio">🎲 Aleatório</option>
-              <option value="Humanóide">🧍 Humanóide</option>
-              <option value="Distante">🌊 Distante</option>
-              <option value="Automático">🤖 Automático</option>
-              <option value="Colônia">🐜 Colônia</option>
-              <option value="Vinculado">⛓️ Vinculado</option>
-              <option value="Ato">🎭 Ato (Multiforme)</option>
-            </select>
-          </div>
-          <div>
-            <label style="font-size:0.7rem;color:var(--muted);display:block;margin-bottom:3px;">Poder Destrutivo</label>
-            <select id="poderDestrutivo">
-              <option value="aleatorio">🎲 Aleatório</option>
-              <option value="A">A — Devastador</option>
-              <option value="B">B — Grande</option>
-              <option value="C">C — Médio</option>
-              <option value="D">D — Baixo</option>
-              <option value="E">E — Mínimo</option>
-            </select>
-          </div>
-        </div>
-        <button class="btn" id="btnGerar" onclick="gerarStand()">⭐ Gerar Stand</button>
-      </div>
+    <div class="form-group">
+      <label>Tipo de Manifesta&#231;&#227;o</label>
+      <select id="tipoManifestacao">
+        <option value="aleatorio">&#127922; Aleat&#243;rio</option>
+        <option value="Human&#243;ide">&#129489; Human&#243;ide</option>
+        <option value="Distante">&#127754; Distante</option>
+        <option value="Autom&#225;tico">&#129302; Autom&#225;tico</option>
+        <option value="Col&#244;nia">&#127028; Col&#244;nia</option>
+        <option value="Vinculado">&#9939;&#65039; Vinculado</option>
+        <option value="Ato">&#127917; Ato (Multiforme)</option>
+      </select>
     </div>
+
+    <div class="form-group">
+      <label>Poder Destrutivo</label>
+      <select id="poderDestrutivo">
+        <option value="aleatorio">&#127922; Aleat&#243;rio</option>
+        <option value="A">A &#8212; Devastador</option>
+        <option value="B">B &#8212; Grande</option>
+        <option value="C">C &#8212; M&#233;dio</option>
+        <option value="D">D &#8212; Baixo</option>
+        <option value="E">E &#8212; M&#237;nimo</option>
+      </select>
+    </div>
+
+    <button class="btn" id="btnGerar" onclick="gerarStand()">&#11088; Gerar Stand</button>
   </aside>
 
-  <!-- ÁREA PRINCIPAL -->
+  <!-- PAINEL HISTORICO -->
+  <div class="history-panel" id="historyPanel">
+    <div id="historyChips"></div>
+  </div>
+
+  <!-- CONTEUDO PRINCIPAL -->
   <main class="main-content">
+
+    <div class="loading" id="loading">Manifestando Stand...</div>
     <div class="error-box" id="errorBox"></div>
 
-    <div class="loading" id="loading">
-      <div class="spinner"></div>
-      <div>Manifestando Stand...</div>
-    </div>
-
-    <!-- CARD -->
     <div class="card" id="card">
-      <div class="card-grid">
-
-        <!-- COLUNA ESQUERDA -->
-        <div class="lore-col">
-          <div class="card-header">
-            <div class="card-number" id="cardNumero">#001</div>
-            <div class="card-name" id="cardNome">Carregando</div>
-            <div class="card-category" id="cardTema">Tema Desconhecido</div>
-          </div>
-
-          <div class="types" id="cardTipos"></div>
-
-          <div class="section-label">Habilidade Principal</div>
-          <div class="dex-entry" id="cardHabilidade"></div>
-
-          <div class="section-label" style="margin-top:18px;">Descrição</div>
-          <div class="dex-entry" id="cardDescricao"></div>
-
-          <div id="promptContainer" style="margin-top:15px;"></div>
-
-          <!-- LINHA DE ATOS — só visível em Stands do tipo Ato -->
-          <div id="atoLineSection" style="display:none; margin-top:24px;">
-            <div class="section-label">Linha de Atos</div>
-            <div class="evo-section">
-              <div class="evo-line" id="atoLine"></div>
-            </div>
-          </div>
-
-          <div class="section-label" style="margin-top: 24px;">Fraquezas &amp; Limitações</div>
-          <div class="dex-entry" id="cardFraquezas"></div>
-
-          <div class="section-label" style="margin-top: 24px;">Técnicas</div>
-          <div class="abilities-row" id="tecnicasList"></div>
-
-          <button class="copy-btn" onclick="copiarStand()">📋 Copiar texto</button>
+      <div class="card-header">
+        <div>
+          <div class="card-number" id="cardNumero">#001</div>
+          <div class="card-name" id="cardNome">Carregando</div>
+          <div class="card-tema" id="cardTema">Tema Desconhecido</div>
+          <div class="card-tipos" id="cardTipos"></div>
         </div>
+      </div>
 
-        <!-- COLUNA DIREITA -->
-        <div class="combat-col">
-          <div>
-            <div class="section-label">Estatísticas</div>
-            <div class="stats-container">
-              <div class="stats-grid" id="statsGrid"></div>
-            </div>
-          </div>
+      <div class="card-section">
+        <div class="section-title">Habilidade Principal</div>
+        <div class="card-text" id="cardHabilidade"></div>
+      </div>
 
-          <div>
-            <div class="section-label">Detalhes do Stand</div>
-            <div class="abilities-row" id="detalhesRow"></div>
-          </div>
+      <div class="card-section">
+        <div class="section-title">Descri&#231;&#227;o</div>
+        <div class="card-text" id="cardDescricao"></div>
+      </div>
 
-          <div>
-            <div class="section-label">Usuário</div>
-            <div class="abilities-row" id="usuarioBox"></div>
-          </div>
+      <!-- LINHA DE ATOS -->
+      <div class="card-section" id="atoLineSection" style="display:none;">
+        <div class="section-title">Linha de Atos</div>
+        <div class="ato-line" id="atoLine"></div>
+      </div>
 
-          <div>
-            <div class="section-label">Referências Musicais</div>
-            <div class="location-list" id="refMusicais"></div>
-          </div>
-        </div>
+      <div class="card-section">
+        <div class="section-title">Fraquezas &amp; Limita&#231;&#245;es</div>
+        <div class="card-text" id="cardFraquezas"></div>
+      </div>
 
+      <div class="card-section">
+        <div class="section-title">T&#233;cnicas</div>
+        <div id="tecnicasList"></div>
+      </div>
+
+      <!-- BOTOES DE ACAO -->
+      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:4px;">
+        <button class="btn btn-secondary copy-btn" onclick="copiarStand()">&#128203; Copiar texto</button>
+        <button class="btn btn-requiem" id="btnRequiem" style="display:none;" onclick="gerarRequiem()">&#9760;&#65039; Transformar em R&#233;quiem</button>
+      </div>
+
+      <div class="card-section" id="promptContainer"></div>
+
+      <div class="card-section">
+        <div class="section-title">Estat&#237;sticas</div>
+        <div class="stats-grid" id="statsGrid"></div>
+      </div>
+
+      <div class="card-section">
+        <div class="section-title">Detalhes do Stand</div>
+        <div class="detalhes-row" id="detalhesRow"></div>
+      </div>
+
+      <div class="card-section">
+        <div class="section-title">Usu&#225;rio</div>
+        <div id="usuarioBox"></div>
+      </div>
+
+      <div class="card-section">
+        <div class="section-title">Refer&#234;ncias Musicais</div>
+        <div id="refMusicais"></div>
       </div>
     </div>
+
   </main>
 
   <script src="script.js"></script>
