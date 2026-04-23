@@ -304,3 +304,33 @@ body {
 .rank-D { background: rgba(100,116,139,0.2); color: #94a3b8; }
 .rank-E { background: rgba(107,114,128,0.15); color: #6b7280; }
 .rank-Infinito { background: rgba(168,85,247,0.2); color: #a855f7; }
+
+
+/* BOTAO REQUIEM */
+.btn-requiem {
+  background: linear-gradient(135deg, #8b0000, #c0392b);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 0.85rem;
+  font-weight: 800;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 0 12px rgba(139,0,0,0.4);
+  width: auto;
+}
+.btn-requiem:hover {
+  background: linear-gradient(135deg, #a00000, #e74c3c);
+  box-shadow: 0 0 20px rgba(192,57,43,0.6);
+  transform: translateY(-1px);
+}
+.btn-requiem:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
